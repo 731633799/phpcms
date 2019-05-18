@@ -7,6 +7,27 @@
  * @lastmodify			2010-6-1
  */
 
+
+//判断手机还是PC
+function is_mobile($mobile = false){
+    if ($mobile) return true;
+    if (stristr($_SERVER['HTTP_VIA'], "wap")) {
+        $mobile = true;
+    }
+    elseif (stripos($_SERVER['HTTP_ACCEPT'], "VND.WAP.WML") > 0){
+        $mobile = true;
+    }
+    elseif (preg_match('/(blackberry|configuration\/cldc|hp |hp-|htc |htc_|htc-|iemobile|kindle|midp|mmp|motorola|mobile|nokia|opera mini|opera |Googlebot-Mobile|YahooSeeker\/M1A1-R2D2|android|iphone|ipod|mobi|palm|palmos|pocket|portalmmm|ppc;|smartphone|sonyericsson|sqh|spv|symbian|treo|up.browser|up.link|vodafone|windows ce|xda |xda_)/i', $_SERVER['HTTP_USER_AGENT'])) {//检查USER_AGENT
+        $mobile = true;
+    }
+    if ($mobile or stripos($_SERVER['SERVER_NAME'], 'm.') === 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 /**
  * 返回经addslashes处理过的字符串或数组
  * @param $string 需要处理的字符串或数组
@@ -83,28 +104,28 @@ function safe_replace($string) {
  * @param $string
  * @return string
  */
-function remove_xss($string) { 
+function remove_xss($string) {
     $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $string);
 
     $parm1 = Array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
 
     $parm2 = Array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
 
-    $parm = array_merge($parm1, $parm2); 
+    $parm = array_merge($parm1, $parm2);
 
-	for ($i = 0; $i < sizeof($parm); $i++) { 
-		$pattern = '/'; 
-		for ($j = 0; $j < strlen($parm[$i]); $j++) { 
-			if ($j > 0) { 
-				$pattern .= '('; 
-				$pattern .= '(&#[x|X]0([9][a][b]);?)?'; 
-				$pattern .= '|(&#0([9][10][13]);?)?'; 
-				$pattern .= ')?'; 
+	for ($i = 0; $i < sizeof($parm); $i++) {
+		$pattern = '/';
+		for ($j = 0; $j < strlen($parm[$i]); $j++) {
+			if ($j > 0) {
+				$pattern .= '(';
+				$pattern .= '(&#[x|X]0([9][a][b]);?)?';
+				$pattern .= '|(&#0([9][10][13]);?)?';
+				$pattern .= ')?';
 			}
-			$pattern .= $parm[$i][$j]; 
+			$pattern .= $parm[$i][$j];
 		}
 		$pattern .= '/i';
-		$string = preg_replace($pattern, ' ', $string); 
+		$string = preg_replace($pattern, ' ', $string);
 	}
 	return $string;
 }
@@ -309,7 +330,7 @@ function string2array($data) {
 */
 function array2string($data, $isformdata = 1) {
 	if($data == '' || empty($data)) return '';
-	
+
 	if($isformdata) $data = new_stripslashes($data);
 	if(strtolower(CHARSET)=='gbk'){
 		$data = mult_iconv("GBK", "UTF-8", $data);
@@ -1038,7 +1059,7 @@ function menu_linkage($linkageid = 0, $id = 'linkid', $defaultvalue = 0) {
 		$string .=$s;
 		$string .= ')';
 		$string .= '</script>';
-		
+
 	} elseif($datas['style']=='2') {
 		if(!defined('LINKAGE_INIT_1')) {
 			define('LINKAGE_INIT_1', 1);
@@ -1071,7 +1092,7 @@ function menu_linkage($linkageid = 0, $id = 'linkid', $defaultvalue = 0) {
 							$ld5.eq(index).show();								}
 					})
 		</script>';
-			
+
 	} else {
 		$title = $defaultvalue ? $infos[$defaultvalue]['name'] : $datas['title'];
 		$colObj = random(3).date('is');
@@ -1790,5 +1811,5 @@ function get_vid($contentid = 0, $catid = 0, $isspecial = 0) {
 		return $minite.":".$secend;
 	}
 
- } 
+ }
 ?>
