@@ -7,7 +7,7 @@ class index {
 		$this->db = pc_base::load_model('search_model');
 		$this->content_db = pc_base::load_model('content_model');
 	}
-	
+
 	/**
 	 * 关键词搜索
 	 */
@@ -35,7 +35,7 @@ class index {
 			$q = new_html_special_chars(strip_tags($q));
 			$q = str_replace('%', '', $q);	//过滤'%'，用户全文搜索
 			$search_q = $q;	//搜索原内容
-			
+
 			//按时间搜索
 			if($time == 'day') {
 				$search_time = SYS_TIME - 86400;
@@ -63,7 +63,7 @@ class index {
 			if($setting['sphinxenable']) {
 				$sphinx = pc_base::load_app_class('search_interface', '', 0);
 				$sphinx = new search_interface();
-				
+
 				$offset = $pagesize*($page-1);
 				$res = $sphinx->search($q, array($siteid), array($typeid), array($search_time, SYS_TIME), $offset, $pagesize, '@weight desc');
 				$totalnums = $res['total'];
@@ -114,7 +114,7 @@ class index {
 				}
 				$relation = $this->keyword_db->select("MATCH (`data`) AGAINST ('%$relation_q%' IN BOOLEAN MODE)", '*', 10, 'searchnums DESC');
 			}
-				
+
 			//如果结果不为空
 			  if(!empty($result) || !empty($commend['id'])) {
 				//开启sphinx后文章id取法不同
@@ -142,7 +142,7 @@ class index {
 				//是否读取其他模块接口
 				if($modelid) {
 					$this->content_db->set_model($modelid);
-					
+
 					/**
 					 * 如果表名为空，则为黄页模型
 					 */
@@ -160,7 +160,7 @@ class index {
 						$pages = $this->db->pages;
 						$totalnums = $this->db->number;
 					}
-				
+
 					//如果分词结果为空
 					if(!empty($segment_q)) {
 						$replace = explode(' ', $segment_q);
@@ -188,27 +188,27 @@ class index {
 			$pages = isset($pages) ? $pages : '';
 			$totalnums = isset($totalnums) ? $totalnums : 0;
 			$data = isset($data) ? $data : '';
-			
-			include	template('search','list');
+
+            include  template("search",(is_mobile() && AUTO_MOBILE==true)?"mobile_list":'list');
 		} else {
-			include	template('search','index');
+            include  template("search",(is_mobile() && AUTO_MOBILE==true)?"mobile_index":'index');
 		}
 	}
 
-	
+
 	public function public_get_suggest_keyword() {
 		$url = $_GET['url'].'&q='.$_GET['q'];
 		$trust_url = array('c8430fcf851e85818b546addf5bc4dd3');
 		$urm_md5 = md5($url);
 		if (!in_array($urm_md5, $trust_url)) exit;
-		
+
 		$res = @file_get_contents($url);
 		if(CHARSET != 'gbk') {
 			$res = iconv('gbk', CHARSET, $res);
 		}
 		echo $res;
 	}
-	
+
 	/**
 	 * 提示搜索接口
 	 * TODO 暂时未启用，用的是google的接口
@@ -222,12 +222,12 @@ class index {
 		}
 		$this->keyword_db = pc_base::load_model('search_keyword_model');
 		$suggest = $this->keyword_db->select("pinyin like '$pinyin%'", '*', 10, 'searchnums DESC');
-		
+
 		foreach($suggest as $v) {
 			echo $v['keyword']."\n";
 		}
 
-		
+
 	}
 }
 ?>

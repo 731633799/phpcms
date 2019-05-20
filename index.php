@@ -9,7 +9,7 @@
  //PHPCMS根目录
 
 define('PHPCMS_PATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
-
+define('AUTO_MOBILE', true);   //开启手机自动跳转
 include PHPCMS_PATH.'/phpcms/base.php';
 
 pc_base::creat_app();
