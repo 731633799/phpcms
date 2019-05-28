@@ -469,68 +469,71 @@ class content extends admin {
 	/**
 	 * 显示栏目菜单列表
 	 */
-	public function public_categorys() {
-		$show_header = '';
-		$cfg = getcache('common','commons');
-		$ajax_show = intval($cfg['category_ajax']);
-		$from = isset($_GET['from']) && in_array($_GET['from'],array('block')) ? $_GET['from'] : 'content';
-		$tree = pc_base::load_sys_class('tree');
-		if($from=='content' && $_SESSION['roleid'] != 1) {	
-			$this->priv_db = pc_base::load_model('category_priv_model');
-			$priv_result = $this->priv_db->select(array('action'=>'init','roleid'=>$_SESSION['roleid'],'siteid'=>$this->siteid,'is_admin'=>1));
-			$priv_catids = array();
-			foreach($priv_result as $_v) {
-				$priv_catids[] = $_v['catid'];
-			}
-			if(empty($priv_catids)) return '';
-		}
-		$_GET['menuid'] = intval($_GET['menuid']);
-		$categorys = array();
-		if(!empty($this->categorys)) {
-			foreach($this->categorys as $r) {
-				if($r['siteid']!=$this->siteid ||  ($r['type']==2 && $r['child']==0)) continue;
-				if($from=='content' && $_SESSION['roleid'] != 1 && !in_array($r['catid'],$priv_catids)) {
-					$arrchildid = explode(',',$r['arrchildid']);
-					$array_intersect = array_intersect($priv_catids,$arrchildid);
-					if(empty($array_intersect)) continue;
-				}
-				if($r['type']==1 || $from=='block') {
-					if($r['type']==0) {
-						$r['vs_show'] = "<a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=".$r['catid']."&type=show' target='right'>[".L('content_page')."]</a>";
-					} else {
-						$r['vs_show'] ='';
-					}
-					$r['icon_type'] = 'file';
-					$r['add_icon'] = '';
-					$r['type'] = 'add';
-				} else {
-					$r['icon_type'] = $r['vs_show'] = '';
-					$r['type'] = 'init';
-					$r['add_icon'] = "<a target='right' href='?m=content&c=content&menuid=".$_GET['menuid']."&catid=".$r['catid']."' onclick=javascript:openwinx('?m=content&c=content&a=add&menuid=".$_GET['menuid']."&catid=".$r['catid']."&hash_page=".$_SESSION['hash_page']."','')><img src='".IMG_PATH."add_content.gif' alt='".L('add')."'></a> ";
-				}
-				$categorys[$r['catid']] = $r;
-			}
-		}
-		if(!empty($categorys)) {
-			$tree->init($categorys);
-				switch($from) {
-					case 'block':
-						$strs = "<span class='\$icon_type'>\$add_icon<a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=\$catid&type=list' target='right'>\$catname</a> \$vs_show</span>";
-						$strs2 = "<img src='".IMG_PATH."folder.gif'> <a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=\$catid&type=category' target='right'>\$catname</a>";
-					break;
+    public function public_categorys() {
+        $show_header = '';
+        $cfg = getcache('common','commons');
+        $ajax_show = intval($cfg['category_ajax']);
+        $from = isset($_GET['from']) && in_array($_GET['from'],array('block')) ? $_GET['from'] : 'content';
+        $tree = pc_base::load_sys_class('tree');
+        if($from=='content' && $_SESSION['roleid'] != 1) {
+            $this->priv_db = pc_base::load_model('category_priv_model');
+            $priv_result = $this->priv_db->select(array('action'=>'init','roleid'=>$_SESSION['roleid'],'siteid'=>$this->siteid,'is_admin'=>1));
+            $priv_catids = array();
+            foreach($priv_result as $_v) {
+                $priv_catids[] = $_v['catid'];
+            }
+            if(empty($priv_catids)) return '';
+        }
+        $_GET['menuid'] = intval($_GET['menuid']);
+        $categorys = array();
+        if(!empty($this->categorys)) {
+            foreach($this->categorys as $r) {
+                if($r['siteid']!=$this->siteid ||  ($r['type']==2 && $r['child']==0)) continue;
+                if($from=='content' && $_SESSION['roleid'] != 1 && !in_array($r['catid'],$priv_catids)) {
+                    $arrchildid = explode(',',$r['arrchildid']);
+                    $array_intersect = array_intersect($priv_catids,$arrchildid);
+                    if(empty($array_intersect)) continue;
+                }
+                if($r['type']==1 || $from=='block') {
+                    if($r['type']==0) {
+                        $r['vs_show'] = "<a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=".$r['catid']."&type=show' target='right'>[".L('content_page')."]</a>";
+                    } else {
+                        $r['vs_show'] ='';
+                    }
+                    $r['icon_type'] = 'file';
+                    $r['add_icon'] = '';
+                    $r['type'] = 'add';
+                    $r['add_page'] = "<a href='?m=content&c=content&a=".$r['type']."&menuid=".$_GET['menuid']."&catid=".$r['catid']."' target='right' onclick='open_list(this)'> {编辑} </a>";
+                } else {
+                    $r['icon_type'] = $r['vs_show'] = '';
+                    $r['type'] = 'init';
+                    $r['add_page'] = ''; // 栏目频道页时不可发布内容
+                    $r['add_icon'] = "<a target='right' href='?m=content&c=content&menuid=".$_GET['menuid']."&catid=".$r['catid']."' onclick=javascript:openwinx('?m=content&c=content&a=add&menuid=".$_GET['menuid']."&catid=".$r['catid']."&hash_page=".$_SESSION['hash_page']."','')><img src='".IMG_PATH."add_content.gif' alt='".L('add')."'></a> ";
+                }
+                $categorys[$r['catid']] = $r;
+            }
+        }
+        if(!empty($categorys)) {
+            $tree->init($categorys);
+            switch($from) {
+                case 'block':
+                    $strs = "<span class='\$icon_type'>\$add_icon<a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=\$catid&type=list' target='right'>\$catname</a> \$vs_show</span>";
+                    $strs2 = "<img src='".IMG_PATH."folder.gif'> <a href='?m=block&c=block_admin&a=public_visualization&menuid=".$_GET['menuid']."&catid=\$catid&type=category' target='right'>\$catname</a>";
+                    break;
 
-					default:
-						$strs = "<span class='\$icon_type'>\$add_icon<a href='?m=content&c=content&a=\$type&menuid=".$_GET['menuid']."&catid=\$catid' target='right' onclick='open_list(this)'>\$catname</a></span>";
-						$strs2 = "<span class='folder'>\$catname</span>";
-						break;
-				}
-			$categorys = $tree->get_treeview(0,'category_tree',$strs,$strs2,$ajax_show);
-		} else {
-			$categorys = L('please_add_category');
-		}
+                default:
+                    $strs = "<span class='\$icon_type'>\$add_icon<a href='?m=content&c=content&a=\$type&menuid=".$_GET['menuid']."&catid=\$catid' target='right' onclick='open_list(this)'>\$catname</a></span>";
+//						$strs2 = "<span class='folder'>\$catname</span>";
+                    $strs2 = "<span class='folder'>\$catname \$add_page </span>"; // $add_page 单页面频道页时可添加内容
+                    break;
+            }
+            $categorys = $tree->get_treeview(0,'category_tree',$strs,$strs2,$ajax_show);
+        } else {
+            $categorys = L('please_add_category');
+        }
         include $this->admin_tpl('category_tree');
-		exit;
-	}
+        exit;
+    }
 	/**
 	 * 检查标题是否存在
 	 */
